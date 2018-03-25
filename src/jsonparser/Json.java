@@ -2,6 +2,9 @@ package jsonparser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import static jsonparser.JsonObject.JsonType.ObjectType;
 import jsonparser.JsonTokenizer.TokenType;
 import static jsonparser.JsonTokenizer.TokenType.*;
 
@@ -10,6 +13,18 @@ public class Json {
     public static JsonObject parse(InputStream iStream) throws IOException, JsonException {
         JsonTokenizer jtok = new JsonTokenizer(iStream);
         return getObject(jtok);
+    }
+
+    public static Object parse(InputStream iStream, Class c)
+            throws InstantiationException, IllegalAccessException,
+            IOException, JsonException, NoSuchFieldException {
+
+        Object obj = c.newInstance();
+        JsonObject jobj = parse(iStream);
+
+        assign(obj, jobj);
+
+        return obj;
     }
 
     private static JsonObject getObject(JsonTokenizer jtok) throws IOException, JsonException {
@@ -54,12 +69,91 @@ public class Json {
                 jobj = new StringObject(jtok.getStok());
                 break;
             case NUMBER:
-                jobj = new NumberObject(jtok.getNumVal());
+                jobj = jtok.getStok().contains(".") ? new DoubleObject(jtok.getStok())
+                        : new IntObject(jtok.getStok());
                 break;
             case ERROR:
                 throw new JsonException(jtok, "Error occured while parsing");
         }
         return jobj;
+    }
+
+    public static String dump(Object obj) throws IllegalArgumentException, IllegalAccessException {
+        return sbdump(obj).toString();
+    }
+    
+    public static StringBuffer sbdump(Object obj) throws IllegalArgumentException, IllegalAccessException {
+        
+        Class<?> ctype = obj.getClass();
+        if(isPrimitive(ctype)) {
+            if(ctype == String.class)
+                return StringObject.encodeString((String)obj);
+            else
+                return new StringBuffer().append(obj);
+        }
+        
+        
+        StringBuffer sbuf = new StringBuffer();
+        
+        if(obj.getClass().isArray()) {
+            sbuf.append('[');
+            for (int i = 0; i < Array.getLength(obj); i++) {
+                if(i != 0)
+                    sbuf.append(',');
+                sbuf.append(dump(Array.get(obj, i)));
+            }
+            sbuf.append(']');
+        } else {
+            int i = 0;
+            Field[] fields = obj.getClass().getFields();
+            sbuf.append('{');
+            for (Field field : fields) {
+                
+                if(field.get(obj) == null)
+                    continue;
+                
+                if(i++ != 0)
+                    sbuf.append(',');
+                sbuf.append(StringObject.encodeString(field.getName())).append(':');
+                sbuf.append(dump(field.get(obj)));
+            }
+            sbuf.append('}');
+        }
+        return sbuf;
+    }
+    
+    private static void assign(Object obj, JsonObject jobj) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException, InstantiationException {
+
+        if (jobj.getType() == ObjectType) {
+            DictObject dobj = (DictObject) jobj;
+            for (String key : dobj.keySet()) {
+                Field field = obj.getClass().getField(key);
+                JsonObject val = dobj.get(key);
+                Class<?> co = field.getType();
+                if (isPrimitive(co)) {
+                    field.set(obj, val.getValue());
+                } else {
+                    if (co.isArray()) {
+                        field.set(obj, Array.newInstance(co.getComponentType(), ((JsonArray) val).size()));
+                    } else {
+                        field.set(obj, co.newInstance());
+                    }
+                    assign(field.get(obj), val);
+                }
+            }
+        } else {
+            int i = 0;
+            for (JsonObject ele : ((JsonArray) jobj).getElements()) {
+                Array.set(obj, i++, ele.getValue());
+            }
+        }
+    }
+
+    public static boolean isPrimitive(Class<?> type) {
+        return (type.isPrimitive() && type != void.class)
+                || type == Double.class || type == Float.class || type == Long.class
+                || type == Integer.class || type == Short.class || type == Character.class
+                || type == Byte.class || type == Boolean.class || type == String.class;
     }
 
 }

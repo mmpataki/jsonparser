@@ -18,12 +18,27 @@ public class StringObject extends JsonObject {
     
     @Override
     public String toString() {
-        return get();
+        return encodeString(value).toString();
+    }
+    
+    public static StringBuffer encodeString(String value) {
+        StringBuffer sbuf = new StringBuffer("\"");
+        for (int i = 0; i < value.length(); i++) {
+            if(value.charAt(i) == '\"')
+                sbuf.append('\\');
+            sbuf.append(value.charAt(i));
+        }
+        return sbuf.append('\"');
     }
 
     @Override
     public JsonType getType() {
         return JsonType.String;
+    }
+
+    @Override
+    public Object getValue() {
+        return get();
     }
 
 }

@@ -6,6 +6,10 @@ public class JsonArray extends JsonObject {
     
     ArrayList<JsonObject> elements;
 
+    ArrayList<JsonObject> getElements() {
+        return (ArrayList<JsonObject>) elements.clone();
+    }
+    
     public JsonArray() {
         elements = new ArrayList<>();
     }
@@ -37,5 +41,10 @@ public class JsonArray extends JsonObject {
     @Override
     public JsonType getType() {
         return JsonType.ArrayType;
+    }
+
+    @Override
+    public Object getValue() {
+        return this;
     }
 }

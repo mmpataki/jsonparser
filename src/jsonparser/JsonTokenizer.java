@@ -12,7 +12,6 @@ public class JsonTokenizer {
     private final PushbackReader pbrdr;
     private int lineNumber = 1;
     private StringBuffer stok;
-    private Double numVal;
     private final Stack<TokenType> stk;
     
     public enum TokenType {
@@ -36,10 +35,6 @@ public class JsonTokenizer {
         stk.push(tok);
     }
     
-    double getNumVal() {
-        return numVal;
-    }
-    
     public String getStok() {
         return stok.toString();
     }
@@ -56,13 +51,16 @@ public class JsonTokenizer {
         
         char ch = (char) pbrdr.read();
         stok = new StringBuffer();
+        
         switch (ch) {
             case '{':
                 return LBRACE;
             case '[':
                 return LSBRACKET;
             case '\"':
-                while ((ch = (char) pbrdr.read()) != '\"') {
+            case '\'':
+                char tosee = ch == '\'' ? '\'' : '\"';
+                while ((ch = (char) pbrdr.read()) != tosee) {
                     if (ch == '\\') {
                         stok.append((char)pbrdr.read());
                         continue;
@@ -98,7 +96,7 @@ public class JsonTokenizer {
             case '0': case '1': case '2':
             case '3': case '4': case '5':
             case '6': case '7': case '8':
-            case '.': case '9':
+            case '.': case '9': case '-':
                 boolean dotSeen = false;
                 do {
                     stok.append(ch);
@@ -108,7 +106,6 @@ public class JsonTokenizer {
                     dotSeen = (ch == '.');
                 } while(ch >= '0' && ch <= '9' || ch == '.');
                 pbrdr.unread(ch);
-                numVal = Double.parseDouble(stok.toString());
                 return NUMBER;
         }
         return ERROR;

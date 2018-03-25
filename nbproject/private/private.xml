@@ -3,10 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/DictObject.java</file>
             <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/JsonArray.java</file>
+            <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/NumberObject.java</file>
             <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/Jsonparser.java</file>
-            <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/JsonKVp.java</file>
+            <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/JsonTokenizer.java</file>
+            <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/StringObject.java</file>
+            <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/TypedObject.java</file>
             <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/Json.java</file>
+            <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/JsonException.java</file>
             <file>file:/C:/Users/mpataki/Documents/NetBeansProjects/jsonparser/src/jsonparser/JsonObject.java</file>
         </group>
     </open-files>

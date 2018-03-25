@@ -5,7 +5,8 @@ public abstract class JsonObject implements TypedObject {
     public enum JsonType {
         String,
         Object,
-        Numeric,
+        Integer,
+        Double,
         DateTime,
         ArrayType,
         ObjectType
