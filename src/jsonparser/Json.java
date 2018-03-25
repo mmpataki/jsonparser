@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static jsonparser.JsonObject.JsonType.ObjectType;
 import jsonparser.JsonTokenizer.TokenType;
 import static jsonparser.JsonTokenizer.TokenType.*;
@@ -15,16 +17,25 @@ public class Json {
         return getObject(jtok);
     }
 
+    public static JsonObject parse(String jsonString) throws IOException, JsonException {
+        return parse(new CharInputStream(jsonString));
+    }
+
+    public static Object parse(String jsonString, Class c) throws JsonException, IOException {
+        return parse(new CharInputStream(jsonString), c);
+    }
+
     public static Object parse(InputStream iStream, Class c)
-            throws InstantiationException, IllegalAccessException,
-            IOException, JsonException, NoSuchFieldException {
+            throws IOException, JsonException {
 
-        Object obj = c.newInstance();
-        JsonObject jobj = parse(iStream);
-
-        assign(obj, jobj);
-
-        return obj;
+        try {
+            Object obj = c.newInstance();
+            JsonObject jobj = parse(iStream);
+            assign(obj, jobj);
+            return obj;
+        } catch (InstantiationException | IllegalAccessException | NoSuchFieldException | IllegalArgumentException ex) {
+            throw new JsonException("Field mismatch or AccessException");
+        }
     }
 
     private static JsonObject getObject(JsonTokenizer jtok) throws IOException, JsonException {
@@ -78,28 +89,29 @@ public class Json {
         return jobj;
     }
 
-    public static String dump(Object obj) throws IllegalArgumentException, IllegalAccessException {
+    public static String dump(Object obj) throws JsonException {
         return sbdump(obj).toString();
     }
-    
-    public static StringBuffer sbdump(Object obj) throws IllegalArgumentException, IllegalAccessException {
-        
+
+    public static StringBuffer sbdump(Object obj) throws JsonException {
+
         Class<?> ctype = obj.getClass();
-        if(isPrimitive(ctype)) {
-            if(ctype == String.class)
-                return StringObject.encodeString((String)obj);
-            else
+        if (isPrimitive(ctype)) {
+            if (ctype == String.class) {
+                return StringObject.encodeString((String) obj);
+            } else {
                 return new StringBuffer().append(obj);
+            }
         }
-        
-        
+
         StringBuffer sbuf = new StringBuffer();
-        
-        if(obj.getClass().isArray()) {
+
+        if (obj.getClass().isArray()) {
             sbuf.append('[');
             for (int i = 0; i < Array.getLength(obj); i++) {
-                if(i != 0)
+                if (i != 0) {
                     sbuf.append(',');
+                }
                 sbuf.append(dump(Array.get(obj, i)));
             }
             sbuf.append(']');
@@ -108,20 +120,26 @@ public class Json {
             Field[] fields = obj.getClass().getFields();
             sbuf.append('{');
             for (Field field : fields) {
-                
-                if(field.get(obj) == null)
-                    continue;
-                
-                if(i++ != 0)
-                    sbuf.append(',');
-                sbuf.append(StringObject.encodeString(field.getName())).append(':');
-                sbuf.append(dump(field.get(obj)));
+
+                try {
+                    if (field.get(obj) == null) {
+                        continue;
+                    }
+
+                    if (i++ != 0) {
+                        sbuf.append(',');
+                    }
+                    sbuf.append(StringObject.encodeString(field.getName())).append(':');
+                    sbuf.append(dump(field.get(obj)));
+                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                    Logger.getLogger(Json.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             sbuf.append('}');
         }
         return sbuf;
     }
-    
+
     private static void assign(Object obj, JsonObject jobj) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException, InstantiationException {
 
         if (jobj.getType() == ObjectType) {

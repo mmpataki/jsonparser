@@ -15,11 +15,23 @@ public class DictObject extends JsonObject {
         return dict.keySet();
     }
     
-    JsonObject get(String key) {
+    public JsonObject get(String key) {
         return dict.get(key);
     }
     
-    void set(String key, JsonObject obj) {
+    public void set(String key, Integer value) {
+        dict.put(key, new IntObject(value));
+    }
+    
+    public void set(String key, Double obj) {
+        dict.put(key, new DoubleObject(obj));
+    }
+    
+    public void set(String key, String obj) {
+        dict.put(key, new StringObject(obj));
+    }
+    
+    public void set(String key, JsonObject obj) {
         dict.put(key, obj);
     }
 

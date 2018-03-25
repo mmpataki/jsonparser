@@ -7,7 +7,7 @@ import java.io.PushbackReader;
 import java.util.Stack;
 import static jsonparser.JsonTokenizer.TokenType.*;
 
-public class JsonTokenizer {
+class JsonTokenizer {
 
     private final PushbackReader pbrdr;
     private int lineNumber = 1;

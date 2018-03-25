@@ -8,6 +8,10 @@ public class DoubleObject extends JsonObject {
         value = Double.parseDouble(stok);
     }
 
+    DoubleObject(Double value) {
+        this.value = value;
+    }
+
     @Override
     public JsonType getType() {
         return JsonType.Double;

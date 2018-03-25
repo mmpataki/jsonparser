@@ -8,6 +8,10 @@ public class IntObject extends JsonObject {
         value = Integer.parseInt(stok);
     }
 
+    IntObject(Integer value) {
+        this.value = value;
+    }
+
     @Override
     public JsonType getType() {
         return JsonType.Double;
