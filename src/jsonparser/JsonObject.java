@@ -6,6 +6,7 @@ public abstract class JsonObject implements TypedObject {
         String,
         Object,
         Integer,
+        Long,
         Double,
         DateTime,
         ArrayType,

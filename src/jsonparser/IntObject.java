@@ -14,12 +14,17 @@ public class IntObject extends JsonObject {
 
     @Override
     public JsonType getType() {
-        return JsonType.Double;
+        return JsonType.Integer;
     }
 
     @Override
     public Object getValue() {
         return value;
+    }
+    
+    @Override
+    public String toString() {
+        return String.valueOf(value);
     }
     
 }

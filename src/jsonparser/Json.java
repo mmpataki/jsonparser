@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static jsonparser.JsonObject.JsonType.ObjectType;
@@ -47,8 +48,11 @@ public class Json {
         switch (tok) {
             case LBRACE:
                 jobj = new DictObject();
+                if(jtok.peekToken() == RBRACE)
+                    return jobj;
                 do {
-                    if (jtok.nextToken() != QSTRING) {
+                    TokenType ntok = jtok.nextToken();
+                    if (ntok != QSTRING) {
                         throw new JsonException(jtok, "Expected a Key here");
                     }
                     String key = jtok.getStok();
@@ -63,7 +67,13 @@ public class Json {
                 break;
             case LSBRACKET:
                 jobj = new JsonArray();
+                if(jtok.peekToken() == RBRACE)
+                    return jobj;
                 do {
+                    if((tok = jtok.nextToken()) == RSBRACKET)
+                        break;
+                    else
+                        jtok.pushBack(tok);
                     JsonObject child = getObject(jtok);
                     JsonArray jarr = ((JsonArray) jobj);
                     jarr.add(child);
@@ -80,8 +90,16 @@ public class Json {
                 jobj = new StringObject(jtok.getStok());
                 break;
             case NUMBER:
-                jobj = jtok.getStok().contains(".") ? new DoubleObject(jtok.getStok())
-                        : new IntObject(jtok.getStok());
+                
+                if(jtok.getStok().contains("."))
+                    jobj = new DoubleObject(jtok.getStok());
+                else {
+                    try {
+                        jobj = new IntObject(jtok.getStok());
+                    } catch(Exception ex) {
+                        jobj = new LongObject(jtok.getStok());
+                    }
+                }
                 break;
             case ERROR:
                 throw new JsonException(jtok, "Error occured while parsing");
@@ -112,7 +130,33 @@ public class Json {
                 if (i != 0) {
                     sbuf.append(',');
                 }
-                sbuf.append(dump(Array.get(obj, i)));
+                sbuf.append(sbdump(Array.get(obj, i)));
+            }
+            sbuf.append(']');
+        } else if(obj instanceof Iterable) {
+            sbuf.append('[');
+            Iterable collection = (Iterable) obj;
+            int i = 0;
+            for (Object obx: collection) {
+                if (i++ != 0) {
+                    sbuf.append(',');
+                }
+                sbuf.append(sbdump(obx));
+            }
+            sbuf.append(']');
+        } else if(obj instanceof HashMap) {
+            sbuf.append('[');
+            int i = 0;
+            HashMap map = (HashMap)obj;
+            for (Object key: map.keySet()) {
+                if (i++ != 0) {
+                    sbuf.append(',');
+                }
+                
+                sbuf.append('{')
+                        .append(sbdump(key)).append(':')
+                            .append(sbdump(map.get(key)))
+                    .append('}');
             }
             sbuf.append(']');
         } else {
@@ -121,16 +165,18 @@ public class Json {
             sbuf.append('{');
             for (Field field : fields) {
 
+                if(field.getAnnotation(JsonExposed.class) == null)
+                    continue;
+                
                 try {
                     if (field.get(obj) == null) {
                         continue;
                     }
-
                     if (i++ != 0) {
                         sbuf.append(',');
                     }
                     sbuf.append(StringObject.encodeString(field.getName())).append(':');
-                    sbuf.append(dump(field.get(obj)));
+                    sbuf.append(sbdump(field.get(obj)));
                 } catch (IllegalArgumentException | IllegalAccessException ex) {
                     Logger.getLogger(Json.class.getName()).log(Level.SEVERE, null, ex);
                 }

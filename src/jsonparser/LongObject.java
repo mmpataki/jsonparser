@@ -1,20 +1,20 @@
 package jsonparser;
 
-public class DoubleObject extends JsonObject {
+public class LongObject extends JsonObject {
 
-    private final double value;
+    private final long value;
     
-    public DoubleObject(String stok) {
-        value = Double.parseDouble(stok);
+    public LongObject(String stok) {
+        value = Long.parseLong(stok);
     }
 
-    DoubleObject(Double value) {
+    LongObject(Long value) {
         this.value = value;
     }
 
     @Override
-    public JsonType getType() {
-        return JsonType.Double;
+    public JsonObject.JsonType getType() {
+        return JsonObject.JsonType.Long;
     }
 
     @Override

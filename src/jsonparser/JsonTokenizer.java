@@ -13,6 +13,11 @@ class JsonTokenizer {
     private int lineNumber = 1;
     private StringBuffer stok;
     private final Stack<TokenType> stk;
+
+    TokenType peekToken() throws IOException {
+        stk.push(nextToken());
+        return stk.peek();
+    }
     
     public enum TokenType {
         LBRACE,
