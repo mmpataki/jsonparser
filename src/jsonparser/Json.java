@@ -114,7 +114,7 @@ public class Json {
     public static StringBuffer sbdump(Object obj) throws JsonException {
 
         Class<?> ctype = obj.getClass();
-        if (isPrimitive(ctype)) {
+        if (isPrimitive(ctype) || (obj instanceof JsonObject)) {
             if (ctype == String.class) {
                 return StringObject.encodeString((String) obj);
             } else {
