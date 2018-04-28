@@ -18,6 +18,10 @@ public class JsonArray extends JsonObject {
         elements.add(obj);
     }
     
+    public void remove(int index) {
+        elements.remove(index);
+    }
+    
     public int size() {
         return elements.size();
     }

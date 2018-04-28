@@ -25,7 +25,7 @@ public class StringObject extends JsonObject {
         StringBuffer sbuf = new StringBuffer("\"");
         for (int i = 0; i < value.length(); i++) {
             if(value.charAt(i) == '\"')
-                sbuf.append('\\');
+                sbuf.append("\\\\");
             sbuf.append(value.charAt(i));
         }
         return sbuf.append('\"');

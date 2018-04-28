@@ -67,7 +67,7 @@ class JsonTokenizer {
                 char tosee = ch == '\'' ? '\'' : '\"';
                 while ((ch = (char) pbrdr.read()) != tosee) {
                     if (ch == '\\') {
-                        stok.append((char)pbrdr.read());
+                        stok.append("\\").append((char)pbrdr.read());
                         continue;
                     }
                     if(ch == '\n' || ch == '\r')
